@@ -32,19 +32,24 @@ export function AppSidebar() {
   const username = localStorage.getItem("username") || "";
   const isLoggedIn = username && username.trim() !== "";
 
+  // ✅ Fetch as soon as user logs in
   const handleFetch = async () => {
     if (!isLoggedIn) return;
 
     try {
       setFetching(true);
-      const resp = await fetch(`http://localhost:8080/get/${username}`);
+      const resp = await fetch(`http://localhost:8080/getquesinfo/${username}`);
       if (!resp.ok) {
-        console.log("Error fetching previous records");
+        console.error("Error fetching previous records");
         return;
       }
+
       const data = await resp.json();
       console.log("Fetched records:", data);
       setRecords(data);
+
+      // optional: mark data as synced
+      localStorage.setItem("updatedThing", "false");
     } catch (e) {
       console.error("Error fetching records:", e.message);
     } finally {
@@ -52,22 +57,22 @@ export function AppSidebar() {
     }
   };
 
+  // 🔄 Automatically fetch on login OR when updatedThing changes
   useEffect(() => {
     handleFetch();
-  }, [username]);
+  }, [username, localStorage.getItem("updatedThing")]);
 
   const handleRecordClick = (record) =>
     navigate("/Selection", { state: record });
-
   const handleHomeClick = () => navigate("/Selection", { state: null });
 
   const updateContent = (id) =>
-    setRecords((prevRecords) => prevRecords.filter((item) => item.id !== id));
+    setRecords((prev) => prev.filter((item) => item.id !== id));
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this record?")) return;
-
     setFetching(true);
+
     try {
       const formData = new FormData();
       formData.append("username", username);
@@ -136,12 +141,12 @@ export function AppSidebar() {
           </div>
         ) : (
           <SidebarGroup>
-            <SidebarGroupLabel>Previous Uploads</SidebarGroupLabel>
+            <SidebarGroupLabel>Previous Exams</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {records.length === 0 ? (
                   <p className="text-sm text-muted-foreground px-3 py-2">
-                    No previous uploads
+                    No previous exams found.
                   </p>
                 ) : (
                   records.map((item) => (
@@ -150,9 +155,9 @@ export function AppSidebar() {
                         <button
                           onClick={() => handleRecordClick(item)}
                           className="flex items-center justify-between truncate w-full text-left hover:bg-accent/50 rounded-md px-2 py-1"
-                          title={item.title}
+                          title={`Exam - ${item.id}`}
                         >
-                          <span>{item.title || "Untitled"}</span>
+                          <span>Exam - {item.id}</span>
                         </button>
                       </SidebarMenuButton>
 
@@ -166,7 +171,7 @@ export function AppSidebar() {
                           <DropdownMenuItem
                             onClick={() =>
                               alert(
-                                `Edit feature coming soon for ${item.title}`
+                                `Edit feature coming soon for Exam - ${item.id}`
                               )
                             }
                           >
@@ -182,8 +187,8 @@ export function AppSidebar() {
                     </SidebarMenuItem>
                   ))
                 )}
-                <p className="text-sm text-muted-foreground px-3 py-2">
-                  Please relod the page in to see recent uploads.
+                <p className="text-xs text-muted-foreground px-3 py-2">
+                  Reload the page to refresh recent uploads.
                 </p>
               </SidebarMenu>
             </SidebarGroupContent>
@@ -214,7 +219,7 @@ export function AppSidebar() {
                       onClick={() => {
                         localStorage.removeItem("username");
                         localStorage.removeItem("typeData");
-                        // localStorage.removeItem()
+                        localStorage.removeItem("updatedThing");
                         navigate("/");
                       }}
                     >
@@ -222,11 +227,7 @@ export function AppSidebar() {
                     </DropdownMenuItem>
                   </>
                 ) : (
-                  <DropdownMenuItem
-                    onClick={() => {
-                      navigate("/signin");
-                    }}
-                  >
+                  <DropdownMenuItem onClick={() => navigate("/signin")}>
                     <span>Sign In</span>
                   </DropdownMenuItem>
                 )}

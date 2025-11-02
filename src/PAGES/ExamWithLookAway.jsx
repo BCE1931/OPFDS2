@@ -297,11 +297,12 @@ function ExamWithLookAway() {
 
         const data = await response.text();
         console.log("✅ Exam submitted successfully:", data);
+        localStorage.setItem("updatedthing", true);
 
         // ✅ Wait 300ms, then navigate to /analyze
         setTimeout(() => {
           navigate("/analyze", { state: summaryData });
-        }, 300);
+        }, 200);
       } catch (error) {
         console.error("❌ Error submitting exam:", error);
         alert("Something went wrong while submitting exam results.");

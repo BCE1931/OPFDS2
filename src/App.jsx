@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./components/theme-provider";
 import { ModeToggle } from "./components/mode-toggle";
@@ -6,16 +6,17 @@ import Layout from "./PAGES/layout";
 import Card1 from "./PAGES/Card1";
 import Signup from "./PAGES/Signup";
 import ExamWithLookAway from "./PAGES/ExamWithLookAway";
-import { useState, useEffect } from "react";
 import Analyze from "./PAGES/Analyze";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Check from "./PAGES/Check";
 import IntroPage from "./PAGES/Intropage";
+import Hero from "./PAGES/Hero";
+
 const App = () => {
   const PublicRoute = ({ element }) => {
     return localStorage.getItem("username") ? (
-      <Navigate to="/check" replace />
+      <Navigate to="/hero" replace />
     ) : (
       element
     );
@@ -46,6 +47,7 @@ const App = () => {
       <ToastContainer />
       <BrowserRouter>
         {isExamMode ? (
+          // ✅ Exam mode pages only
           <div className="app-container">
             <Routes>
               <Route
@@ -56,57 +58,59 @@ const App = () => {
                 path="/exam"
                 element={<ProtectedRoute element={<ExamWithLookAway />} />}
               />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/exam" replace />} />
             </Routes>
           </div>
         ) : (
-          <Layout>
-            <div className="app-container">
-              <div className="top-right">
-                <ModeToggle />
-              </div>
-
-              <div>
-                <div>
-                  <Routes>
-                    <Route
-                      path="/"
-                      element={<PublicRoute element={<IntroPage />} />}
-                    />
-                    <Route
-                      path="/signin"
-                      element={<PublicRoute element={<Card1 />} />}
-                    />
-                    <Route
-                      path="/signup"
-                      element={<PublicRoute element={<Signup />} />}
-                    />
-
-                    <Route
-                      path="/check"
-                      element={<ProtectedRoute element={<Check />} />}
-                    />
-
-                    {/* <Route
-                      path="/exam"
-                      element={
-                        <ProtectedRoute element={<ExamWithLookAway />} />
-                      }
-                    /> */}
-                    <Route
-                      path="/analyze"
-                      element={<ProtectedRoute element={<Analyze />} />}
-                    />
-
-                    <Route
-                      path="*"
-                      element={<Navigate to="/signin" replace />}
-                    />
-                  </Routes>
-                </div>
-              </div>
+          // ✅ Normal (non-exam) pages
+          <div className="app-container">
+            <div className="top-right">
+              <ModeToggle />
             </div>
-          </Layout>
+
+            <Routes>
+              {/* Public routes */}
+              <Route
+                path="/"
+                element={<PublicRoute element={<IntroPage />} />}
+              />
+              <Route
+                path="/signin"
+                element={<PublicRoute element={<Card1 />} />}
+              />
+              <Route
+                path="/signup"
+                element={<PublicRoute element={<Signup />} />}
+              />
+
+              {/* ✅ Only /hero has sidebar layout */}
+              <Route
+                path="/hero"
+                element={
+                  <ProtectedRoute
+                    element={
+                      <Layout>
+                        <Hero />
+                      </Layout>
+                    }
+                  />
+                }
+              />
+
+              {/* Other protected pages (no sidebar) */}
+              <Route
+                path="/check"
+                element={<ProtectedRoute element={<Check />} />}
+              />
+              <Route
+                path="/analyze"
+                element={<ProtectedRoute element={<Analyze />} />}
+              />
+
+              {/* Catch-all */}
+              <Route path="*" element={<Navigate to="/signin" replace />} />
+            </Routes>
+          </div>
         )}
       </BrowserRouter>
     </ThemeProvider>
