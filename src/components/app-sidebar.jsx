@@ -224,7 +224,7 @@ export function AppSidebar() {
                 ) : (
                   <DropdownMenuItem
                     onClick={() => {
-                      navigate("/");
+                      navigate("/signin");
                     }}
                   >
                     <span>Sign In</span>

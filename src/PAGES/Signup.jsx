@@ -162,7 +162,7 @@ const Signup = () => {
             </Button>
 
             <Button className="w-full bg-gray-800 hover:bg-gray-700 text-white">
-              <Link to="/">Sign In</Link>
+              <Link to="/signin">Sign In</Link>
             </Button>
 
             <Button className="w-full bg-gray-800 hover:bg-gray-700 text-white mt-2">

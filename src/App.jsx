@@ -11,6 +11,7 @@ import Analyze from "./PAGES/Analyze";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Check from "./PAGES/Check";
+import IntroPage from "./PAGES/Intropage";
 const App = () => {
   const PublicRoute = ({ element }) => {
     return localStorage.getItem("username") ? (
@@ -24,7 +25,7 @@ const App = () => {
     return localStorage.getItem("username") ? (
       element
     ) : (
-      <Navigate to="/" replace />
+      <Navigate to="/signin" replace />
     );
   };
 
@@ -70,6 +71,10 @@ const App = () => {
                   <Routes>
                     <Route
                       path="/"
+                      element={<PublicRoute element={<IntroPage />} />}
+                    />
+                    <Route
+                      path="/signin"
                       element={<PublicRoute element={<Card1 />} />}
                     />
                     <Route
@@ -93,7 +98,10 @@ const App = () => {
                       element={<ProtectedRoute element={<Analyze />} />}
                     />
 
-                    <Route path="*" element={<Navigate to="/" replace />} />
+                    <Route
+                      path="*"
+                      element={<Navigate to="/signin" replace />}
+                    />
                   </Routes>
                 </div>
               </div>
