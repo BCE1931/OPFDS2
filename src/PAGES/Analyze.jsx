@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import CountUp from "react-countup";
 import { questions } from "..";
@@ -22,6 +23,10 @@ import {
 } from "@/components/ui/chart";
 
 function Analyze() {
+  const location = useLocation();
+  const examInfo =
+    location.state || JSON.parse(localStorage.getItem("analyzeData")) || null;
+
   const [chartData, setChartData] = useState([]);
   const [summary, setSummary] = useState({
     totalQuestions: 0,
@@ -31,31 +36,19 @@ function Analyze() {
   });
 
   useEffect(() => {
+    if (examInfo) {
+      setSummary({
+        totalQuestions: examInfo.totalQuestions || 0,
+        attempted: examInfo.attempted || 0,
+        score: examInfo.score || 0,
+        totalLookTime: examInfo.totalLookTime || 0,
+      });
+    }
+
     const stored = JSON.parse(localStorage.getItem("typeData")) || {};
     const questionKeys = Object.keys(stored).filter(
       (key) => !isNaN(Number(key)) && typeof stored[key] === "object"
     );
-
-    const totalQuestions = questionKeys.length;
-    const attempted = questionKeys.filter(
-      (key) => stored[key].selectedAnswer && stored[key].selectedAnswer !== ""
-    ).length;
-
-    // ✅ FIXED SCORE LOGIC (using your imported questions array)
-    let score = 0;
-    questionKeys.forEach((key) => {
-      const questionIndex = Number(key);
-      const correct = questions[questionIndex]?.answer; // uses `questions` from import
-      const selected = stored[key]?.selectedAnswer;
-      if (selected && correct && selected === correct) score++;
-    });
-
-    const totalLookTime = questionKeys.reduce(
-      (sum, key) => sum + (stored[key].lookawaytime || 0),
-      0
-    );
-
-    setSummary({ totalQuestions, attempted, score, totalLookTime });
 
     const formattedData = questionKeys.map((key) => {
       const q = stored[key];
@@ -71,7 +64,7 @@ function Analyze() {
     });
 
     setChartData(formattedData);
-  }, []);
+  }, [examInfo]);
 
   const chartConfig = {
     Theoretical: { label: "Theoretical", color: "#ef4444" },
@@ -80,38 +73,35 @@ function Analyze() {
 
   return (
     <div className="w-full min-h-screen bg-background text-foreground mt-8 px-6 space-y-8">
-      {/* ✅ Number Ticker Section */}
+      {/* ✅ Exam info header */}
+      {examInfo && (
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold">{examInfo.title}</h2>
+          <p className="text-sm text-muted-foreground">
+            Username: {examInfo.username} | Exam ID: {examInfo.id}
+          </p>
+        </div>
+      )}
+
+      {/* ✅ Summary Section */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
         {[
-          {
-            label: "Total Questions",
-            value: summary.totalQuestions,
-            // color: "text-gray-900 dark:text-white",
-          },
-          {
-            label: "Attempted",
-            value: summary.attempted,
-            // color: "text-blue-500 dark:text-blue-400",
-          },
-          {
-            label: "Score",
-            value: summary.score,
-            // color: "text-green-500 dark:text-green-400",
-          },
+          { label: "Total Questions", value: summary.totalQuestions },
+          { label: "Attempted", value: summary.attempted },
+          { label: "Score", value: summary.score },
           {
             label: "Look-Away Time (s)",
             value: summary.totalLookTime.toFixed(1),
-            // color: "text-red-500 dark:text-red-400",
           },
         ].map((item, idx) => (
           <div
             key={idx}
-            className="bg-black  rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-6 flex flex-col items-center justify-center"
+            className="bg-black rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-6 flex flex-col items-center justify-center"
           >
             <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
               {item.label}
             </h3>
-            <p className={`text-5xl font-bold ${item.color}`}>
+            <p className="text-5xl font-bold">
               <CountUp
                 end={parseFloat(item.value)}
                 duration={1.2}
@@ -122,8 +112,8 @@ function Analyze() {
         ))}
       </div>
 
-      {/* ✅ Chart Section (smaller height, separate card) */}
-      <Card className="w-full h-[75vh]  bg-black shadow-lg rounded-2xl">
+      {/* ✅ Chart Section */}
+      <Card className="w-full h-[75vh] bg-black shadow-lg rounded-2xl">
         <CardHeader className="flex items-center justify-between border-b py-4 px-6">
           <div>
             <CardTitle>📊 Analyze Results</CardTitle>

@@ -74,14 +74,18 @@ export function AppSidebar() {
     setFetching(true);
 
     try {
-      const formData = new FormData();
-      formData.append("username", username);
-      formData.append("id", id);
+      // const formData = new FormData();
+      // formData.append("username", username);
+      // formData.append("id", id);
+      let username = localStorage.getItem("username");
 
-      const resp = await fetch("http://localhost:8080/delete", {
-        method: "DELETE",
-        body: formData,
-      });
+      const resp = await fetch(
+        `http://localhost:8080/delete/${username}/${id}`,
+        {
+          method: "DELETE",
+          // body: formData,
+        }
+      );
 
       if (!resp.ok) {
         alert("Error deleting record");
@@ -95,6 +99,11 @@ export function AppSidebar() {
     } finally {
       setFetching(false);
     }
+  };
+
+  const handleAnalyze = (record) => {
+    localStorage.setItem("analyzeData", JSON.stringify(record));
+    navigate("/analyze", { state: record });
   };
 
   return (
@@ -168,14 +177,13 @@ export function AppSidebar() {
                           </SidebarMenuAction>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent side="right" align="start">
+                          <DropdownMenuItem onClick={() => handleAnalyze(item)}>
+                            Analysis
+                          </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() =>
-                              alert(
-                                `Edit feature coming soon for Exam - ${item.id}`
-                              )
-                            }
+                          // onClick={() => handleDelete(item.id)}
                           >
-                            Edit
+                            Exam Results
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => handleDelete(item.id)}
