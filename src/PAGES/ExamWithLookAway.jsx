@@ -227,18 +227,18 @@ function ExamWithLookAway() {
   };
 
   // ✅ Confirm & Navigate
-  const confirmAndNavigate = () => {
+  const confirmAndNavigate = async () => {
     if (summaryData) {
       // ✅ Turn off exam mode in both state and localStorage
       setExamMode(false);
       localStorage.setItem("examMode", "false");
       window.dispatchEvent(new Event("storage"));
 
-      // ✅ Stop the camera feed properly
+      // ✅ Stop camera feed safely
       if (videoRef.current && videoRef.current.srcObject) {
         const stream = videoRef.current.srcObject;
         const tracks = stream.getTracks();
-        tracks.forEach((track) => track.stop()); // stop each video/audio track
+        tracks.forEach((track) => track.stop());
         videoRef.current.srcObject = null;
         console.log("📷 Camera stopped successfully");
       }
@@ -252,10 +252,60 @@ function ExamWithLookAway() {
         document.webkitExitFullscreen();
       }
 
-      // ✅ Wait 200ms for App.jsx to update route view, then navigate
-      setTimeout(() => {
-        navigate("/analyze", { state: summaryData });
-      }, 200);
+      // ✅ Collect stored data for backend
+      const storedData = JSON.parse(localStorage.getItem("typeData")) || {};
+
+      // 🔹 Build full list for backend
+      const questionsList = questions.map((q, index) => {
+        const local = storedData[index] || {};
+        return {
+          question: q.question,
+          option1: q.options?.[0] || "",
+          option2: q.options?.[1] || "",
+          option3: q.options?.[2] || "",
+          option4: q.options?.[3] || "",
+          selectedAnswer: local.selectedAnswer || "",
+          answer: q.answer,
+          lookawaytime: local.lookawaytime || 0,
+          type: local.type || "MCQ",
+          username: localStorage.getItem("username") || "guest",
+        };
+      });
+
+      // ✅ Create Quesinfo object
+      const quesinfo = {
+        title: "Online Exam",
+        username: localStorage.getItem("username") || "guest",
+        totalQuestions: summaryData.totalQuestions,
+        attempted: summaryData.attempted,
+        score: summaryData.score,
+        totalLookTime: summaryData.totalLookTime,
+      };
+
+      try {
+        console.log("📤 Sending data to backend...");
+
+        const response = await fetch("http://localhost:8080/addques", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ quesinfo, questions: questionsList }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to submit exam: ${response.statusText}`);
+        }
+
+        const data = await response.text();
+        console.log("✅ Exam submitted successfully:", data);
+
+        // ✅ Wait 300ms, then navigate to /analyze
+        setTimeout(() => {
+          navigate("/analyze", { state: summaryData });
+        }, 300);
+      } catch (error) {
+        console.error("❌ Error submitting exam:", error);
+        alert("Something went wrong while submitting exam results.");
+      }
     }
   };
 
@@ -277,6 +327,42 @@ function ExamWithLookAway() {
     document.addEventListener("fullscreenchange", handleFullScreenChange);
     return () =>
       document.removeEventListener("fullscreenchange", handleFullScreenChange);
+  }, []);
+
+  // 🧠 Ensure all questions exist in localStorage (even if skipped)
+  useEffect(() => {
+    let storedData = JSON.parse(localStorage.getItem("typeData")) || {};
+    const username = localStorage.getItem("username") || "guest";
+
+    questions.forEach((q, index) => {
+      if (!storedData[index]) {
+        storedData[index] = {
+          questionid: index,
+          question: q.question,
+          options: q.options,
+          answer: q.answer,
+          selectedAnswer: "", // 👈 empty by default
+          lookawaytime: 0,
+          type: q.type || "",
+          username,
+        };
+      } else {
+        // ensure existing entries still have default props
+        storedData[index] = {
+          questionid: index,
+          question: q.question,
+          options: q.options,
+          answer: q.answer,
+          selectedAnswer: storedData[index].selectedAnswer || "",
+          lookawaytime: storedData[index].lookawaytime || 0,
+          type: storedData[index].type || "",
+          username,
+        };
+      }
+    });
+
+    localStorage.setItem("typeData", JSON.stringify(storedData));
+    console.log("✅ Initialized all questions into localStorage");
   }, []);
 
   return (
