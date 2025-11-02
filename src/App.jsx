@@ -10,11 +10,11 @@ import { useState, useEffect } from "react";
 import Analyze from "./PAGES/Analyze";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import Check from "./PAGES/Check";
 const App = () => {
   const PublicRoute = ({ element }) => {
     return localStorage.getItem("username") ? (
-      <Navigate to="/exam" replace />
+      <Navigate to="/check" replace />
     ) : (
       element
     );
@@ -48,7 +48,11 @@ const App = () => {
           <div className="app-container">
             <Routes>
               <Route
-                path="/"
+                path="/check"
+                element={<ProtectedRoute element={<Check />} />}
+              />
+              <Route
+                path="/exam"
                 element={<ProtectedRoute element={<ExamWithLookAway />} />}
               />
               <Route path="*" element={<Navigate to="/" replace />} />
@@ -71,6 +75,11 @@ const App = () => {
                     <Route
                       path="/signup"
                       element={<PublicRoute element={<Signup />} />}
+                    />
+
+                    <Route
+                      path="/check"
+                      element={<ProtectedRoute element={<Check />} />}
                     />
 
                     <Route
