@@ -151,12 +151,14 @@ function ExamWithLookAway() {
 
         // ⏱ 5s warning
         if (lookAwayTime >= 5 && lookAwayTime <= 6) {
+          console.log(" hi you are at 5");
           if (data.type === "Theoretical")
             toast.info("Please focus on the screen! (Theoretical Question)");
         }
 
         // ⏱ 10s warning
-        if (lookAwayTime >= 10 && lookAwayTime < 10.2) {
+        if (lookAwayTime >= 10 && lookAwayTime <= 11) {
+          console.log(" hi you are at 6");
           if (data.type === "Theoretical") {
             toast.info("High Warning! Please focus on the screen!");
           } else if (data.type === "Numerical") {
@@ -169,8 +171,8 @@ function ExamWithLookAway() {
     };
 
     if (
-      (lookAwayTime >= 5 && lookAwayTime < 5.2) ||
-      (lookAwayTime >= 10 && lookAwayTime < 10.2)
+      (lookAwayTime >= 5 && lookAwayTime <= 6) ||
+      (lookAwayTime >= 10 && lookAwayTime <= 11)
     ) {
       sendQuestionToBackend();
     }

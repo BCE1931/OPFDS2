@@ -123,7 +123,7 @@ export default function IntroPage() {
         </div>
 
         {/* Social Dock */}
-        {/* <TooltipProvider>
+        <TooltipProvider>
           <Dock direction="middle">
             {Object.entries(SOCIALS).map(([name, social]) => (
               <DockIcon key={name}>
@@ -147,7 +147,7 @@ export default function IntroPage() {
               </DockIcon>
             ))}
           </Dock>
-        </TooltipProvider> */}
+        </TooltipProvider>
       </div>
 
       {/* ⚙️ RIGHT SIDE: Icon Cloud */}
