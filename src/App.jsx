@@ -82,12 +82,12 @@ const App = () => {
                       element={<ProtectedRoute element={<Check />} />}
                     />
 
-                    <Route
+                    {/* <Route
                       path="/exam"
                       element={
                         <ProtectedRoute element={<ExamWithLookAway />} />
                       }
-                    />
+                    /> */}
                     <Route
                       path="/analyze"
                       element={<ProtectedRoute element={<Analyze />} />}

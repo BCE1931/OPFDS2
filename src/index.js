@@ -3,14 +3,15 @@ export const typeData = {
   type: "",
   alreadyhas: false,
   lookawaytime: 0,
+  selectedAnswer: "", // ✅ added to store user’s chosen option
 };
 
 export const initTypeData = () => {
   if (!localStorage.getItem("typeData")) {
-    localStorage.setItem("typeData", JSON.stringify(typeData));
+    localStorage.setItem("typeData", JSON.stringify({}));
     console.log("✅ typeData created in localStorage");
   } else {
-    console.log(" typeData already exists in localStorage");
+    console.log("ℹ️ typeData already exists in localStorage");
   }
 };
 
