@@ -123,7 +123,7 @@ function Analyze() {
       </div>
 
       {/* ✅ Chart Section (smaller height, separate card) */}
-      <Card className="w-full h-[75vh] bg-white bg-black shadow-lg rounded-2xl">
+      <Card className="w-full h-[75vh]  bg-black shadow-lg rounded-2xl">
         <CardHeader className="flex items-center justify-between border-b py-4 px-6">
           <div>
             <CardTitle>📊 Analyze Results</CardTitle>
